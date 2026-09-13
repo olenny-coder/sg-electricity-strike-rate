@@ -388,7 +388,13 @@ export const api = {
       sources: SourceStatus[];
       facts: MarketFactSheet;
       generated_at: string;
-      storage: { driver: "sqlite" | "postgres"; target: string; detail: string };
+      storage: {
+        driver: "sqlite" | "postgres";
+        target: string;
+        detail: string;
+        durable: boolean;
+        warning: string | null;
+      };
     }>(
       "/api/sources"
     ),

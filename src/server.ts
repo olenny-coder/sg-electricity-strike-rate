@@ -501,9 +501,12 @@ app.get("/api/cron/sync", async (req, reply) => {
 
 app.get("/api/health", async () => {
   const range = await store.marketRange();
+  const storage = storageDescription();
   return {
     ok: true,
-    storage: storageDescription(),
+    storage,
+    // Surfaced at the top level so a naive uptime check can alert on it.
+    storage_durable: storage.durable,
     periods: range.n,
     newest: range.hi,
     uptime_s: Math.round(process.uptime()),
@@ -553,3 +556,15 @@ await app.listen({ port: PORT, host: HOST });
 const storage = storageDescription();
 app.log.info(`Strike listening on http://${HOST}:${PORT}`);
 app.log.info(`Storage: ${storage.driver} (${storage.target})`);
+
+/*
+ * A missing DATABASE_URL in a hosted environment destroys data silently rather
+ * than crashing, so it is reported in a form that cannot be scrolled past and is
+ * also exposed on /api/health for alerting.
+ */
+if (storage.warning) {
+  app.log.warn("=".repeat(78));
+  app.log.warn("  STORAGE WARNING");
+  app.log.warn(`  ${storage.warning}`);
+  app.log.warn("=".repeat(78));
+}

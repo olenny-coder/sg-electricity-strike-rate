@@ -30,7 +30,14 @@ export function SourcesView({
   const [sources, setSources] = useState<SourceStatus[] | null>(null);
   const [facts, setFacts] = useState<MarketFactSheet | null>(data.facts ?? null);
   const [storage, setStorage] = useState<
-    { driver: "sqlite" | "postgres"; target: string; detail: string } | null
+    | {
+        driver: "sqlite" | "postgres";
+        target: string;
+        detail: string;
+        durable: boolean;
+        warning: string | null;
+      }
+    | null
   >(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -52,6 +59,19 @@ export function SourcesView({
 
   return (
     <div className="stack" style={{ gap: 18 }}>
+      {storage?.warning && (
+        <Note tone="bad">
+          <strong>This deployment is not storing data durably.</strong> {storage.warning}
+        </Note>
+      )}
+      {storage?.durable && storage.driver === "postgres" && (
+        <Note tone="good">
+          <strong>Persistent storage active.</strong> Writing to Postgres at{" "}
+          <span className="mono">{storage.target}</span>, so ingested data survives restarts and
+          redeploys.
+        </Note>
+      )}
+
       <div className="grid g-4">
         <Tile
           label="Market periods stored"

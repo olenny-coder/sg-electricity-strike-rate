@@ -143,6 +143,10 @@ export function storageDescription(): {
   driver: DriverKind;
   target: string;
   detail: string;
+  /** False when the backing store will not survive a restart or redeploy. */
+  durable: boolean;
+  /** Set when the configuration is wrong for the environment. Surfaced in the UI. */
+  warning: string | null;
 } {
   if (DRIVER === "postgres") {
     // Never echo credentials — reduce the URL to its host.
@@ -157,13 +161,38 @@ export function storageDescription(): {
       target: host,
       detail:
         "Neon Postgres. Required in production: serverless functions have no persistent disk and Render's free web service filesystem is ephemeral.",
+      durable: true,
+      warning: null,
     };
   }
+
+  /*
+   * SQLite in a hosted production environment is a data-loss trap. It is not a
+   * crash — the app runs perfectly until the host restarts, redeploys or spins
+   * the service down, at which point every ingested period disappears with no
+   * error. Hosts do this without warning, so the failure surfaces days later as
+   * an inexplicably empty dashboard.
+   *
+   * Rather than refuse to boot (which would make a throwaway demo impossible),
+   * this is reported loudly at startup and exposed on /api/health so it can be
+   * alerted on.
+   */
+  const isHosted =
+    process.env.NODE_ENV === "production" ||
+    Boolean(process.env.RENDER || process.env.VERCEL || process.env.DYNO);
+
   return {
     driver: "sqlite",
     target: DB_PATH,
     detail:
       "Local SQLite file. Fine for development; not durable on any free hosting tier, so production sets DATABASE_URL.",
+    durable: !isHosted,
+    warning: isHosted
+      ? "DATABASE_URL is not set, so this deployment is writing to a local SQLite file. " +
+        "On Render the filesystem is ephemeral and on Vercel it does not exist at all, so every " +
+        "ingested period will be LOST on the next restart, redeploy or idle spin-down. " +
+        "Create a Neon Postgres database and set DATABASE_URL to its pooled connection string."
+      : null,
   };
 }
 

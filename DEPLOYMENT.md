@@ -251,6 +251,9 @@ always-on), or $0 if the cold start is acceptable for a pilot.
 # Storage driver, row count, newest period
 curl -s https://your-service.onrender.com/api/health
 
+# The single most important field: is storage durable?
+curl -s https://your-service.onrender.com/api/health | grep -o '"storage_durable":[a-z]*'
+
 # Confirm Neon is live and SQLite is not in use
 curl -s https://your-service.onrender.com/api/sources | grep -o '"driver":"[a-z]*"'
 
@@ -259,5 +262,10 @@ curl -s -H "Authorization: Bearer $CRON_SECRET" \
   https://your-service.onrender.com/api/cron/sync
 ```
 
-`/api/health` reports `storage.driver`. If it says `sqlite` in production,
-`DATABASE_URL` is not set and **your data will be lost on the next restart**.
+**`storage_durable` is the field to alert on.** It is `false` when the app is
+writing to a local SQLite file in a hosted environment — which does not crash, it
+silently loses every ingested period on the next restart, redeploy or idle
+spin-down. The app also prints a boxed `STORAGE WARNING` at startup and shows a
+red banner on the *Data sources* tab, so the condition is hard to miss. It is
+reported rather than fatal so a throwaway demo remains possible.
+
