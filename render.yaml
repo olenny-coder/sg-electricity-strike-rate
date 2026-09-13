@@ -1,0 +1,56 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploys Strike as a single Node web service that serves both the API and the
+# built web client, backed by Neon Postgres.
+#
+# WHY THE FREE PLAN WORKS HERE (and what it costs you):
+#   - Free web services spin down after 15 minutes without inbound traffic and
+#     take roughly a minute to wake. Expect a slow first load.
+#   - The filesystem is ephemeral, so DATABASE_URL is mandatory — without it the
+#     app would fall back to SQLite and silently lose everything on each restart.
+#   - Free instances are explicitly not for production use per Render's docs.
+#     Fine for a demo, a pilot, or internal evaluation.
+#
+# Set DATABASE_URL in the Render dashboard after creating a Neon database.
+# Use Neon's POOLED hostname (it contains "-pooler").
+
+services:
+  - type: web
+    name: strike
+    runtime: node
+    plan: free
+    # Singapore, for lower latency to Neon's ap-southeast-1 region.
+    region: singapore
+    buildCommand: npm ci && npm --prefix web ci && npm run build:web
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Node 24: required for node:sqlite and native TypeScript stripping.
+      - key: NODE_VERSION
+        value: "24.14.1"
+      # Suppress the experimental-SQLite warning in logs.
+      - key: NODE_OPTIONS
+        value: --disable-warning=ExperimentalWarning
+      # Required. Neon pooled connection string. Set in the dashboard — this
+      # blueprint deliberately does not create a Render Postgres, because free
+      # Render databases expire 30 days after creation.
+      - key: DATABASE_URL
+        sync: false
+      - key: PG_POOL_MAX
+        value: "5"
+      # Shared secret for GET /api/cron/sync. Only needed if you drive ingestion
+      # from a platform scheduler rather than GitHub Actions.
+      - key: CRON_SECRET
+        generateValue: true
+      # Set this if a separately-hosted frontend calls this API.
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+# Ingestion is intentionally NOT a Render Cron Job: Render's free tier does not
+# include cron jobs (they start at a $1/month minimum), and free web services are
+# not always running. Run it from GitHub Actions instead — see
+# .github/workflows/ingest.yml — which writes straight to Neon and does not
+# depend on this service being awake.

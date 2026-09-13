@@ -1,0 +1,89 @@
+# Daily market data ingestion.
+#
+# WHY THIS RUNS IN GITHUB ACTIONS RATHER THAN ON THE HOST
+# -------------------------------------------------------
+# The free hosting tiers cannot run a scheduled job well:
+#   - Render's free tier does not include cron jobs at all (they start at a
+#     $1/month minimum), and a free web service is asleep most of the time.
+#   - Vercel Cron on Hobby is limited to once per day AND Hobby is restricted to
+#     non-commercial use, so it is not a safe assumption for a business tool.
+#
+# A scheduled workflow avoids both problems and has a useful property: it writes
+# directly to Postgres, so ingestion succeeds whether or not the web service is
+# awake. No cold-start dependency.
+#
+# EMC publishes final USEP at roughly D+6 business days, so a 14-day re-fetch
+# window catches anything that was provisional or missing on earlier runs.
+# Upserts are idempotent, so re-fetching an overlapping window is harmless.
+
+name: Ingest market data
+
+on:
+  schedule:
+    # 18:10 UTC = 02:10 SGT. Off the hour to avoid GitHub's documented
+    # high-load window at the top of each hour, where runs can be delayed or
+    # dropped.
+    - cron: "10 18 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Days of market data to re-fetch"
+        required: false
+        default: "14"
+
+concurrency:
+  # Never let two ingestion runs overlap and contend for the same rows.
+  group: strike-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the database secret is present
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Refresh the regulated tariff
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run sync:tariff
+
+      - name: Refresh market data
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DAYS: ${{ github.event.inputs.days || '14' }}
+        run: npm run sync -- --days "$DAYS"
+
+      - name: Report stored state
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run status
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Strike ingestion"
+            echo ""
+            echo "- Tariff: EMA quarterly CSV (verified against EMA's published headline)"
+            echo "- Market data: EMC NEMS RT48 feed"
+            echo "- Target: Neon Postgres"
+          } >> "$GITHUB_STEP_SUMMARY"

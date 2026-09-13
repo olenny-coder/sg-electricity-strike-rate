@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+web/node_modules/
+
+# Build output
+web/dist/
+
+# Local database — never commit real ingested data or the WAL sidecars
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Research artefacts captured during the initial data-source investigation.
+# Kept locally as evidence; too large and too incidental to version.
+_research/
+recon/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# Python venv, used only to demonstrate the spec-mandated package's failure
+.venv/
+__pycache__/
+*.pyc

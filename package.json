@@ -1,0 +1,33 @@
+{
+  "name": "strike",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strike — Singapore business electricity price advisory. Real data only.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.ts",
+    "serve": "node tools/serve-detached.mjs",
+    "stop": "node tools/stop.mjs",
+    "sync": "node --disable-warning=ExperimentalWarning src/cli.ts sync",
+    "sync:tariff": "node --disable-warning=ExperimentalWarning src/cli.ts tariff",
+    "seed": "node --disable-warning=ExperimentalWarning src/seed.ts",
+    "probe": "node --disable-warning=ExperimentalWarning src/cli.ts probe",
+    "status": "node --disable-warning=ExperimentalWarning src/cli.ts status",
+    "test": "node test/postgres.mjs",
+    "test:api": "node test/shape.mjs",
+    "build:web": "npm --prefix web run build",
+    "setup": "npm install && npm --prefix web install && npm run build:web"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.3",
+    "fastify": "^5.12.4",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/pg": "^8.23.1"
+  }
+}

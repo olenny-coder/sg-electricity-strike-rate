@@ -1,0 +1,22 @@
+# Normalise line endings. Without this, Git on Windows checks files out with
+# CRLF, and shell commands inside the GitHub Actions workflows break on Linux
+# runners because the carriage return becomes part of the argument.
+#
+# Default: normalise to LF in the repository.
+* text=auto eol=lf
+
+# Windows batch files must keep CRLF to execute correctly.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary assets — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+
+# Keep lockfiles out of diff noise; they are machine-generated.
+package-lock.json -diff linguist-generated

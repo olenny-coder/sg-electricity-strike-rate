@@ -1,0 +1,83 @@
+# Continuous integration: typecheck the client, build it, and verify that the
+# server boots and answers with the contract the client expects.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install server dependencies
+        run: npm ci
+
+      - name: Install client dependencies
+        run: npm --prefix web ci
+
+      - name: Typecheck the client
+        run: npm --prefix web exec tsc -- --noEmit
+
+      - name: Build the client
+        run: npm run build:web
+
+      # Runs the real Postgres store against PGlite (Postgres compiled to WASM),
+      # so the production SQL is executed rather than merely compiled. Without
+      # this, a typo in the Postgres layer would only surface on the first
+      # production deploy, because local development uses SQLite.
+      - name: Test the Postgres storage layer
+        run: npm test
+
+      # The server needs real market data to return a populated dashboard, and CI
+      # has none. This step therefore asserts the *empty-state* contract: the API
+      # must boot, answer, and honestly report that it has no data rather than
+      # serving fabricated values.
+      - name: Boot server and check the empty-state contract
+        run: |
+          set -euo pipefail
+          node --disable-warning=ExperimentalWarning src/server.ts &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8791/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+
+          echo "--- /api/health ---"
+          curl -sf http://127.0.0.1:8791/api/health | tee /dev/stderr
+
+          echo "--- /api/dashboard (must report ready=false with a reason) ---"
+          curl -sf 'http://127.0.0.1:8791/api/dashboard?days=90&mwh=4000&alpha=1.4&curtailable_mw=1' \
+            | node -e '
+              let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{
+                const d=JSON.parse(s);
+                if (d.ready !== false) { console.error("expected ready=false on an empty database"); process.exit(1); }
+                if (!d.reason) { console.error("expected an explanatory reason"); process.exit(1); }
+                console.log("empty-state contract OK:", d.reason);
+              });'
+
+      - name: Check the client is served
+        run: |
+          set -euo pipefail
+          node --disable-warning=ExperimentalWarning src/server.ts &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8791/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8791/ | grep -q 'id="root"' \
+            && echo "client shell served"
