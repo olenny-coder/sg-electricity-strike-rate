@@ -245,7 +245,43 @@ always-on), or $0 if the cold start is acceptable for a pilot.
 
 ---
 
-## 9. Validating the deployment
+## 9. Gotcha: `NODE_ENV=production` breaks the build
+
+This one costs people an hour, so it is documented explicitly.
+
+Setting `NODE_ENV=production` on a Render service applies that variable to the
+**build** as well as the runtime. npm interprets `NODE_ENV=production` as *"omit
+devDependencies"*, so:
+
+```
+npm --prefix web ci
+```
+
+installs 5 packages instead of ~100. Vite is a `devDependency`, so the build then
+fails with:
+
+```
+sh: 1: vite: not found
+==> Build failed
+```
+
+The fix is to override it explicitly, scoped to the directory that actually needs
+a build toolchain:
+
+```yaml
+buildCommand: npm ci && npm --prefix web ci --include=dev && npm run build:web
+```
+
+`--include=dev` is applied only to `web/`. The server needs no devDependencies to
+build — TypeScript is stripped natively by Node — so installing them at the root
+would only slow the build down.
+
+This is why `render.yaml` sets `NODE_ENV=production` **and** passes
+`--include=dev`. The two are not in conflict; they do different jobs.
+
+---
+
+## 10. Validating the deployment
 
 ```bash
 # Storage driver, row count, newest period

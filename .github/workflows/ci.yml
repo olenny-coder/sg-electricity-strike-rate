@@ -21,11 +21,16 @@ jobs:
           node-version: "24"
           cache: npm
 
+      # --include=dev is explicit on purpose. CI does not currently set
+      # NODE_ENV=production, but it does need devDependencies (vitest toolchain,
+      # PGlite for the storage tests), and adding it here makes the workflow
+      # immune to a later NODE_ENV being introduced. The same omission on Render
+      # is what produced "sh: 1: vite: not found".
       - name: Install server dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Install client dependencies
-        run: npm --prefix web ci
+        run: npm --prefix web ci --include=dev
 
       - name: Typecheck the client
         run: npm --prefix web exec tsc -- --noEmit

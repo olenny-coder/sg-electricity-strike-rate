@@ -21,7 +21,18 @@ services:
     plan: free
     # Singapore, for lower latency to Neon's ap-southeast-1 region.
     region: singapore
-    buildCommand: npm ci && npm --prefix web ci && npm run build:web
+    # --include=dev is REQUIRED here, not cosmetic.
+    #
+    # NODE_ENV=production is set below, and Render applies env vars to the BUILD
+    # as well as the runtime. npm treats NODE_ENV=production as "omit
+    # devDependencies", so a plain `npm ci` in web/ installs 5 packages instead
+    # of ~100. Vite is a devDependency, so the build then dies with:
+    #     sh: 1: vite: not found
+    #
+    # `--include=dev` overrides that explicitly. It is scoped to web/ only,
+    # because that is where the build toolchain lives; the server needs no
+    # devDependencies to build and installing them would only slow the build.
+    buildCommand: npm ci && npm --prefix web ci --include=dev && npm run build:web
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
