@@ -16,6 +16,7 @@
     "seed": "node --disable-warning=ExperimentalWarning src/seed.ts",
     "probe": "node --disable-warning=ExperimentalWarning src/cli.ts probe",
     "status": "node --disable-warning=ExperimentalWarning src/cli.ts status",
+    "backfill": "node --disable-warning=ExperimentalWarning tools/backfill.mjs",
     "test": "node test/postgres.mjs",
     "test:api": "node test/shape.mjs",
     "build:web": "npm --prefix web run build",
