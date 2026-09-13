@@ -360,3 +360,53 @@ Configs included: `render.yaml`, `vercel.json`, `.github/workflows/ingest.yml`,
 - **EMA rate-limits automated clients.** Ingestion is written to be a polite
   client, but sustained polling from one IP may still be challenged.
 - **Not financial advice.** Verify every quote against the retailer's fact sheet.
+
+---
+
+## Licence
+
+Split by subject matter, because code and data want different terms:
+
+| | Licence | Covers |
+|---|---|---|
+| **Software** | [MIT](LICENSE) | Source code, scripts, configuration, build files |
+| **Data** | [CC BY 4.0](LICENSE-DATA) | Compiled datasets, derived data, and the factual content of the documentation |
+
+MIT so the code can be reused with the fewest possible obligations. CC BY 4.0 for
+the data because the value is in the compilation — the ingested history, the
+normalisation, the cross-checks against the publishers, and the derivations such
+as the fair value reference and the lock-in score.
+
+Where one file mixes both — `src/sources/facts.ts` is code that also carries
+compiled market facts, `src/seed.ts` is code that also carries compiled published
+rates — the **code is MIT and the compiled content it carries is CC BY 4.0**. The
+line is drawn by subject matter, not by file.
+
+### The upstream data is not ours to license
+
+Worth stating plainly, because it is easy to assume otherwise. The prices are
+facts about the Singapore market whose publishers retain their own terms:
+
+- **USEP, ancillary prices, Load Curtailment Price and Temporary Price Cap
+  parameters** — Energy Market Company (EMC)
+- **The regulated tariff and its components** — Energy Market Authority (EMA) and
+  SP Group
+- **Published retail rates** — the individual retailers
+
+CC BY 4.0 here covers the **compilation and the derivation** — the selection,
+normalisation, reconciliation and computed metrics. It cannot grant any right in
+the source data, because that data was never this project's to license. If you
+plan to redistribute a compiled dataset rather than use it internally, satisfy
+yourself that your use is permitted upstream. Two specifics from the research in
+`docs/`:
+
+- No reuse licence, SLA or rate limit was found published for the EMC endpoint; its
+  own documentation directs users needing more certainty to EMC's paid data
+  subscription.
+- `ema.gov.sg` sits behind Imperva bot management, so automated access is
+  tolerated conditionally rather than granted.
+
+Neither publisher was asked for permission during development, and no claim of
+permission is made. Full scope and attribution wording are in
+[`LICENSE-DATA`](LICENSE-DATA).
+

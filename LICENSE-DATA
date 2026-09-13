@@ -1,0 +1,96 @@
+# Data licence — Creative Commons Attribution 4.0 International
+
+The **compiled datasets, derived data and the factual content of the
+documentation** in this repository are licensed under the
+**Creative Commons Attribution 4.0 International Licence (CC BY 4.0)**.
+
+- Human-readable summary: https://creativecommons.org/licenses/by/4.0/
+- Full legal code (the operative text): https://creativecommons.org/licenses/by/4.0/legalcode
+
+You are free to **share** (copy and redistribute the material in any medium or
+format) and to **adapt** (remix, transform and build upon it) for any purpose,
+including commercially, provided you comply with the attribution condition
+below.
+
+---
+
+## What this licence covers
+
+| Covered by CC BY 4.0 | Examples |
+|---|---|
+| Compiled datasets | Any market-data export produced by the ingest pipeline (CSV, JSON, SQLite or Postgres dump) |
+| Derived data | Fair value reference, lock-in score, three-way cost comparisons, load-shift plans, demand-response estimates, forecasts and their backtest statistics |
+| Compiled reference figures | The verified values recorded in `README.md`, `DEPLOYMENT.md` and `docs/` |
+| Compiled factual content | The market facts carried in `src/sources/facts.ts` and the published fixed-price rates compiled in `src/seed.ts` |
+
+| Covered by MIT instead | See |
+|---|---|
+| Source code, scripts, configuration, build files | [`LICENSE`](LICENSE) |
+
+Where a single file mixes the two — for example `src/sources/facts.ts`, which is
+code that also carries compiled factual content, or `src/seed.ts`, which is code
+that also carries compiled published rates — **the code is MIT and the compiled
+content it carries is CC BY 4.0.** The distinction is by subject matter, not by
+file.
+
+---
+
+## Attribution
+
+The attribution requirement of CC BY 4.0 is satisfied by crediting the
+compilation, linking to the licence, and indicating whether changes were made.
+Something along these lines is sufficient:
+
+> Contains data derived from **Strike — Singapore Electricity Price Advisory**
+> (https://github.com/olenny-coder/sg-electricity-strike-rate), licensed under
+> CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Changes were made:
+> [describe, or state "no changes"].
+
+A reasonable mechanism is a `NOTICE`, `CREDITS` or `SOURCES` file, or an
+attribution line in your own documentation.
+
+---
+
+## Upstream data is not ours to license — read this before redistributing
+
+This is the important limitation, and it is a matter of fact rather than
+preference.
+
+The figures compiled here are **facts about the Singapore electricity market**,
+and their original publishers retain whatever rights and terms they apply:
+
+| Upstream source | Publisher | What it provides |
+|---|---|---|
+| NEMS public market feed (`nems.emcsg.com`) | Energy Market Company (EMC) | Half-hourly USEP, demand, solar, ancillary reserve prices, Load Curtailment Price, Temporary Price Cap parameters |
+| Regulated tariff page and quarterly CSVs | Energy Market Authority (EMA) / SP Group | Quarterly tariff and its component breakdown |
+| Retailer price pages | Individual licensed retailers | Published SME fixed-price rates |
+
+**What CC BY 4.0 covers here is the compilation and the derivation** — the
+selection, the normalisation, the cross-checks, the computed metrics and the
+documentation. It does **not** grant any right in the underlying source data, and
+it cannot, because that data was never this project's to license.
+
+If you intend to redistribute a compiled dataset — rather than use it internally
+— you should satisfy yourself that your use is permitted by each upstream
+publisher. Two specific cautions from the research recorded in this repository:
+
+1. **No reuse licence, SLA or rate limit was found published for the EMC endpoint.**
+   Its documentation points anyone needing "a more secure means of information
+   delivery" to EMC's paid data subscription. Sustained polling and bulk
+   redistribution should be confirmed with EMC directly.
+2. **`ema.gov.sg` is behind Imperva bot management** and may serve an automated
+   client a JavaScript challenge. The tariff CSVs are served from a static path
+   and are not challenged, but this is an operational characteristic rather than a
+   grant of rights.
+
+Neither publisher was asked for permission during the development of this
+project, and no claim of permission is made.
+
+---
+
+## No warranty
+
+The data and derived figures are provided **as is**, without warranty of any
+kind. They are analytical reference material, not financial advice, and not a
+price at which any transaction can be executed. Verify every figure against the
+original publisher before relying on it.

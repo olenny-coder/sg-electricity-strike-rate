@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Strike — Singapore business electricity price advisory. Real data only.",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22.6"
