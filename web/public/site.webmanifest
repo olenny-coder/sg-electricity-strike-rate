@@ -1,0 +1,12 @@
+{
+  "name": "Strike — Singapore Electricity Price Advisory",
+  "short_name": "Strike",
+  "description": "Decide when to lock a fixed electricity price, stay on Singapore's regulated tariff, or float on wholesale.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1E",
+  "theme_color": "#0A0F1E",
+  "lang": "en-SG",
+  "categories": ["business", "finance", "utilities"]
+}

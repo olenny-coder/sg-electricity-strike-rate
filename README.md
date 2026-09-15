@@ -1,11 +1,25 @@
 # Strike — Singapore Business Electricity Price Advisory
 
-An analytics-first decision tool for Singapore commercial and industrial electricity
-buyers. It answers one question well: **when should this site strike on price** —
-lock a fixed contract, stay on the regulated tariff, or keep floating on wholesale?
+[![CI](https://github.com/olenny-coder/sg-electricity-strike-rate/actions/workflows/ci.yml/badge.svg)](https://github.com/olenny-coder/sg-electricity-strike-rate/actions/workflows/ci.yml)
+[![Licence: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+[![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey.svg)](LICENSE-DATA)
+[![Node](https://img.shields.io/badge/node-%3E%3D22.6-339933.svg)](package.json)
+[![Live demo](https://img.shields.io/badge/demo-live-00C2FF.svg)](https://strike-glik.onrender.com/)
+
+An analytics-first decision tool for **Singapore commercial and industrial
+electricity buyers**. It answers one question well: **when should this site strike
+on price** — lock a fixed contract, stay on the regulated tariff, or keep floating
+on wholesale?
 
 Built on **real, verifiable data only**. No placeholder prices, no mock USEP, no
 invented retailer rates.
+
+**Live:** https://strike-glik.onrender.com — free tier, so the first load after
+15 minutes idle takes about a minute to wake.
+
+> **Keywords:** Singapore electricity price · USEP · Uniform Singapore Energy Price ·
+> regulated tariff · Open Electricity Market · commercial electricity contract ·
+> energy procurement · EMA Demand Response · wholesale electricity · energy analytics
 
 ---
 

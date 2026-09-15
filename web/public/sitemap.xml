@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Single-URL application: all sections are client-side state, not addressable
+  routes, so one entry is correct. Listing fragment URLs would produce duplicates
+  without adding anything indexable.
+
+  Update the location if the app moves to a custom domain.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://strike-glik.onrender.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

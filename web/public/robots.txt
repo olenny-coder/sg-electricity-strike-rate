@@ -1,0 +1,15 @@
+# Strike — Singapore business electricity price advisory
+#
+# The app is a single-page application with one canonical URL. Deep links are
+# client-side routes, so they are all served the same document; there is nothing
+# for a crawler to index separately, and listing them would create duplicates.
+
+User-agent: *
+Allow: /
+
+# The API returns JSON, not pages. Crawling it wastes budget and would index
+# raw data responses as if they were documents.
+Disallow: /api/
+
+# Update this if the app moves to a custom domain.
+Sitemap: https://strike-glik.onrender.com/sitemap.xml

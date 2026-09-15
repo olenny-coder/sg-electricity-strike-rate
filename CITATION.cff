@@ -1,0 +1,40 @@
+# Citation metadata for this repository.
+#
+# GitHub renders a "Cite this repository" button from this file, and it gives
+# anyone reusing the compiled dataset a ready-made reference to point at. See
+# https://citation-file-format.github.io/
+
+cff-version: 1.2.0
+message: "If you use this software or its compiled data, please cite it as below."
+title: "Strike: Singapore Business Electricity Price Advisory"
+abstract: >-
+  Analytics for Singapore commercial and industrial electricity buyers deciding
+  when to lock a fixed price, stay on the regulated tariff, or float on wholesale.
+  Compiles real half-hourly USEP, system demand, ancillary reserve prices, Load
+  Curtailment Price and Temporary Price Cap parameters from the Energy Market
+  Company NEMS feed, together with the EMA quarterly regulated tariff and its
+  component breakdown. Provides a three-way cost comparison, a fair value
+  reference built from two independent published anchors, a load-shift optimiser,
+  Demand Response revenue estimation, and a backtested short-term price forecast.
+type: software
+authors:
+  - alias: "olenny-coder"
+repository-code: "https://github.com/olenny-coder/sg-electricity-strike-rate"
+url: "https://strike-glik.onrender.com/"
+keywords:
+  - Singapore
+  - electricity prices
+  - USEP
+  - Uniform Singapore Energy Price
+  - regulated tariff
+  - energy procurement
+  - demand response
+  - energy analytics
+  - price forecasting
+  - open data
+license: MIT
+license-url: "https://github.com/olenny-coder/sg-electricity-strike-rate/blob/main/LICENSE"
+# Note on licensing: the licence field above describes the SOFTWARE. The compiled
+# datasets and derived data are licensed separately under CC BY 4.0. See
+# LICENSE-DATA and LICENSING.md for the scope, and for the important caveat that
+# the underlying source data belongs to EMC and EMA rather than to this project.

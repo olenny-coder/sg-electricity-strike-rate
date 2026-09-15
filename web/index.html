@@ -3,13 +3,107 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!--
+      NOTE ON THE CANONICAL ORIGIN
+      SITE_ORIGIN below is hardcoded to the deployed Render host. If the app moves
+      to a custom domain, update it here and in public/sitemap.xml and
+      public/robots.txt, or search engines will be told the wrong canonical URL.
+    -->
+    <title>Strike — Singapore Business Electricity Price Advisory</title>
     <meta
       name="description"
-      content="Strike — Singapore business electricity price advisory. Real USEP, regulated tariff and demand response analytics."
+      content="Decide when to lock a fixed electricity price, stay on Singapore's regulated tariff, or float on wholesale. Built on real half-hourly USEP, EMA tariff and Demand Response data — no estimates, no placeholder prices."
     />
+    <meta
+      name="keywords"
+      content="Singapore electricity price, USEP, Uniform Singapore Energy Price, regulated tariff, electricity tariff Singapore, business electricity, commercial electricity contract, demand response, EMA, EMC, energy procurement, wholesale electricity Singapore"
+    />
+    <meta name="author" content="olenny-coder" />
+    <link rel="canonical" href="https://strike-glik.onrender.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#F8FAFC" />
     <meta name="color-scheme" content="light dark" />
-    <title>Strike · Singapore Electricity Price Advisory</title>
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Strike" />
+    <meta property="og:locale" content="en_SG" />
+    <meta property="og:url" content="https://strike-glik.onrender.com/" />
+    <meta property="og:title" content="Strike — Singapore Business Electricity Price Advisory" />
+    <meta
+      property="og:description"
+      content="Decide when to lock a fixed electricity price, stay on the regulated tariff, or float on wholesale. Real half-hourly USEP, EMA tariff and Demand Response data."
+    />
+    <meta property="og:image" content="https://strike-glik.onrender.com/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Strike — Singapore business electricity price advisory, with a stylised wholesale price series"
+    />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Strike — Singapore Business Electricity Price Advisory" />
+    <meta
+      name="twitter:description"
+      content="Decide when to lock a fixed electricity price, stay on the regulated tariff, or float on wholesale. Real half-hourly USEP, EMA tariff and Demand Response data."
+    />
+    <meta name="twitter:image" content="https://strike-glik.onrender.com/og-image.png" />
+
+    <!--
+      Structured data. Describes the application and its dataset so search engines
+      can surface it for queries about Singapore electricity prices. Every claim
+      here matches what the app actually does.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://strike-glik.onrender.com/#app",
+            "name": "Strike",
+            "alternateName": "Strike — Singapore Electricity Price Advisory",
+            "url": "https://strike-glik.onrender.com/",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "Energy procurement analytics",
+            "operatingSystem": "Any (web browser)",
+            "inLanguage": "en-SG",
+            "description": "Analytics for Singapore commercial and industrial electricity buyers. Compares the regulated tariff, all-in wholesale exposure and fixed-price contract quotes against real half-hourly market data, and estimates Demand Response revenue.",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SGD" },
+            "about": [
+              { "@type": "Thing", "name": "Uniform Singapore Energy Price (USEP)" },
+              { "@type": "Thing", "name": "Singapore regulated electricity tariff" },
+              { "@type": "Thing", "name": "Demand Response programme" }
+            ],
+            "spatialCoverage": { "@type": "Place", "name": "Singapore" },
+            "license": "https://opensource.org/licenses/MIT",
+            "codeRepository": "https://github.com/olenny-coder/sg-electricity-strike-rate"
+          },
+          {
+            "@type": "Dataset",
+            "@id": "https://strike-glik.onrender.com/#dataset",
+            "name": "Singapore half-hourly electricity market data (compiled)",
+            "description": "Half-hourly USEP, demand, solar, ancillary reserve prices, Load Curtailment Price and Temporary Price Cap parameters compiled from the Energy Market Company NEMS feed, together with the EMA quarterly regulated tariff and its component breakdown.",
+            "temporalCoverage": "2023-05-05/..",
+            "spatialCoverage": { "@type": "Place", "name": "Singapore" },
+            "isAccessibleForFree": true,
+            "creator": { "@type": "Organization", "name": "Strike" },
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isBasedOn": [
+              { "@type": "Dataset", "name": "EMC NEMS public market data", "creator": { "@type": "Organization", "name": "Energy Market Company" } },
+              { "@type": "Dataset", "name": "EMA regulated electricity tariff", "creator": { "@type": "Organization", "name": "Energy Market Authority of Singapore" } }
+            ]
+          }
+        ]
+      }
+    </script>
+
     <script>
       /* Resolve the theme before first paint so there is no flash of the wrong
          colour scheme. Kept inline and tiny on purpose. */
