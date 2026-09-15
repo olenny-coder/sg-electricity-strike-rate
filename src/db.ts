@@ -9,7 +9,19 @@ import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
-const DATA_DIR = path.resolve(process.cwd(), "data");
+/**
+ * Where the SQLite file lives.
+ *
+ * Overridable via STRIKE_DATA_DIR so a test can point at a throwaway directory.
+ * That matters for the smoke test: the empty-state contract ("no data yet, and
+ * say so honestly") can only be asserted against a database that is genuinely
+ * empty, which is true on a fresh CI checkout but never true on a developer
+ * machine that has already ingested. Without this the test would pass in CI and
+ * fail locally, which is worse than no test.
+ *
+ * Only relevant to the SQLite driver; when DATABASE_URL is set this is unused.
+ */
+const DATA_DIR = path.resolve(process.env.STRIKE_DATA_DIR ?? path.join(process.cwd(), "data"));
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 export const DB_PATH = path.join(DATA_DIR, "strike.db");

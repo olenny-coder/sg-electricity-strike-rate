@@ -278,10 +278,26 @@ for the server.
 ## Testing and verification
 
 ```bash
+npm run typecheck     # client TypeScript
 npm test              # Postgres storage layer, against real Postgres (PGlite)
-npm run test:api      # API contract, needs a running server
-node tools/audit-real-data.mjs   # live reconciliation against EMC and EMA
+npm run test:smoke    # boots the server on an empty DB and asserts the contract
+npm run test:api      # full API contract (needs a running server)
+npm run audit:data    # live reconciliation against EMC and EMA
 ```
+
+CI runs the first three plus the client build, so every gate can be reproduced
+locally with the same command.
+
+**`npm run test:smoke` boots the real server against a throwaway empty database**
+and asserts the contract the client depends on: health reports its storage driver,
+the dashboard refuses to fabricate data when it has none and explains why, the SPA
+shell is served including on deep links, unknown API routes return JSON 404 rather
+than HTML, the source registry is exposed, and the ingestion endpoint refuses
+without a secret.
+
+It points the server at a temporary directory via `STRIKE_DATA_DIR`, so the
+empty-state assertion is deterministic. Without that it would pass in CI and fail
+on any machine that had already ingested data — worse than having no test.
 
 **`npm test` runs the production Postgres store against PGlite** — Postgres
 compiled to WebAssembly. That is genuine PostgreSQL parsing and execution, not a

@@ -1,5 +1,10 @@
-# Continuous integration: typecheck the client, build it, and verify that the
-# server boots and answers with the contract the client expects.
+# Continuous integration.
+#
+# Every step corresponds to an npm script rather than an inline shell command, so
+# each one can be reproduced locally with the same result. The previous version
+# used `npm --prefix web exec tsc -- --noEmit`, which silently passed no
+# arguments to tsc: it printed its help text, exited -1 and failed the build,
+# skipping every step behind it.
 
 name: CI
 
@@ -7,6 +12,13 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# A new push supersedes an in-flight run on the same branch; there is no point
+# finishing a build for a commit that is already history.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -21,68 +33,36 @@ jobs:
           node-version: "24"
           cache: npm
 
-      # --include=dev is explicit on purpose. CI does not currently set
-      # NODE_ENV=production, but it does need devDependencies (vitest toolchain,
-      # PGlite for the storage tests), and adding it here makes the workflow
-      # immune to a later NODE_ENV being introduced. The same omission on Render
-      # is what produced "sh: 1: vite: not found".
-      - name: Install server dependencies
-        run: npm ci --include=dev
-
-      - name: Install client dependencies
-        run: npm --prefix web ci --include=dev
+      # --include=dev is explicit. CI needs devDependencies (the Vite/tsc
+      # toolchain, and PGlite for the storage tests), and stating it here makes
+      # the workflow immune to a NODE_ENV being introduced later. The same
+      # omission under NODE_ENV=production is what produced
+      # "sh: 1: vite: not found" on Render.
+      - name: Install dependencies
+        run: |
+          npm ci --include=dev
+          npm --prefix web ci --include=dev
 
       - name: Typecheck the client
-        run: npm --prefix web exec tsc -- --noEmit
+        run: npm run typecheck
 
       - name: Build the client
         run: npm run build:web
 
-      # Runs the real Postgres store against PGlite (Postgres compiled to WASM),
+      # Runs the real Postgres store against PGlite — Postgres compiled to WASM —
       # so the production SQL is executed rather than merely compiled. Without
       # this, a typo in the Postgres layer would only surface on the first
       # production deploy, because local development uses SQLite.
       - name: Test the Postgres storage layer
         run: npm test
 
-      # The server needs real market data to return a populated dashboard, and CI
-      # has none. This step therefore asserts the *empty-state* contract: the API
-      # must boot, answer, and honestly report that it has no data rather than
-      # serving fabricated values.
-      - name: Boot server and check the empty-state contract
-        run: |
-          set -euo pipefail
-          node --disable-warning=ExperimentalWarning src/server.ts &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+      # Boots the real server against a throwaway empty database and asserts the
+      # contract the client depends on. Allocates its own port and tears itself
+      # down, so it cannot race another step for a port.
+      - name: Smoke test the running server
+        run: npm run test:smoke
 
-          for i in $(seq 1 30); do
-            if curl -sf http://127.0.0.1:8791/api/health > /dev/null; then break; fi
-            sleep 1
-          done
-
-          echo "--- /api/health ---"
-          curl -sf http://127.0.0.1:8791/api/health | tee /dev/stderr
-
-          echo "--- /api/dashboard (must report ready=false with a reason) ---"
-          curl -sf 'http://127.0.0.1:8791/api/dashboard?days=90&mwh=4000&alpha=1.4&curtailable_mw=1' \
-            | node -e '
-              let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{
-                const d=JSON.parse(s);
-                if (d.ready !== false) { console.error("expected ready=false on an empty database"); process.exit(1); }
-                if (!d.reason) { console.error("expected an explanatory reason"); process.exit(1); }
-                console.log("empty-state contract OK:", d.reason);
-              });'
-
-      - name: Check the client is served
-        run: |
-          set -euo pipefail
-          node --disable-warning=ExperimentalWarning src/server.ts &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do
-            if curl -sf http://127.0.0.1:8791/ > /dev/null; then break; fi
-            sleep 1
-          done
-          curl -sf http://127.0.0.1:8791/ | grep -q 'id="root"' \
-            && echo "client shell served"
+      # Useful signal, but a transitive advisory should not block a deploy.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+        continue-on-error: true

@@ -18,8 +18,11 @@
     "probe": "node --disable-warning=ExperimentalWarning src/cli.ts probe",
     "status": "node --disable-warning=ExperimentalWarning src/cli.ts status",
     "backfill": "node --disable-warning=ExperimentalWarning tools/backfill.mjs",
+    "typecheck": "npm --prefix web run typecheck",
     "test": "node test/postgres.mjs",
     "test:api": "node test/shape.mjs",
+    "test:smoke": "node --disable-warning=ExperimentalWarning test/smoke.mjs",
+    "audit:data": "node --disable-warning=ExperimentalWarning tools/audit-real-data.mjs",
     "build:web": "npm --prefix web run build",
     "setup": "npm install && npm --prefix web install && npm run build:web"
   },
